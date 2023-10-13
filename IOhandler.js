@@ -24,15 +24,28 @@ const unzipper = require("unzipper"),
  * @return {promise}
  */
 const unzip = (pathIn, pathOut) => {
-  return new Transform ({ ObjectMode: true, Transform: (chunk, enc, push) => {
-    unzipper.Parse(pathIn);
-    fileName = chunk.path;
-    if (filaName.includes(".png")) {
-      chunk.pipe(fs.createWriteStream(pathOut))
-        .on("end", push)
-    }
-  }})
+  // return new Transform ({ ObjectMode: true, Transform: (chunk, enc, push) => {
+  //   unzipper.Parse(pathIn);
+  //   fileName = chunk.path;
+  //   if (filaName.includes(".png")) {
+  //     chunk.pipe(fs.createWriteStream(pathOut))
+  //       .on("end", push)
+  //   }
+  // }})
+
+  // unzipper.ParseOne(pathIn)
+  //   .pipe(fs.createWriteStream(pathOut));
+
+  fs.createReadStream(pathIn)
+    .pipe(unzipper.Extract( {path: pathOut}))
+    .on("entry", entry => entry.autoDrain())
+    .promise()
+    .then(() => console.log("Extraction operation complete"))
+    .catch((err) => console.log(err));
 };
+// const unzipped = path.join(__dirname, "unzipped")
+// const zipFilePath = path.join(__dirname, "myfile.zip");
+// unzip(zipFilePath, unzipped)
 
 /**
  * Description: read all the png files from given directory and return Promise containing array of each png file path
@@ -40,7 +53,20 @@ const unzip = (pathIn, pathOut) => {
  * @param {string} path
  * @return {promise}
  */
-const readDir = (dir) => {};
+const readDir = (dir) => {
+  // return new Promise((resolve, reject) => {
+  //   fs.readdir(dir, (err, files) => {
+  //     if (err) {
+  //       reject(err);
+  //     }
+  //     else {
+  //       resolve(files.filter(file => {
+  //         return path.extname(file) === ".png"
+  //       }))
+  //     }
+  //   })
+  // })
+};
 
 /**
  * Description: Read in png file by given pathIn,
@@ -50,10 +76,36 @@ const readDir = (dir) => {};
  * @param {string} pathProcessed
  * @return {promise}
  */
-const grayScale = (pathIn, pathOut) => {};
+const grayScale = (pathIn, pathOut) => {
+  // fs.createReadStream(pathIn)
+  //   .pipe(
+  //     new PNG({
+  //       filterType: 4
+  //     })
+  //   )
+  //   .on("parsed", function () {
+  //     for (var y = 0; y < this.height; y++) {
+  //       for (var x = 0; x < this.width; x++) {
+  //         var idx = (this.width * y + x) << 2;
+
+  //         var grey = (this.data[idx] + this.data[idx + 1] + this.data[idx + 2]) / 3;
+  //         this.data[idx] = grey;
+  //         this.data[idx + 1] = grey;
+  //         this.data[idx + 2] = grey;
+  //       }
+  //     }
+  //     this.pack().pipe(fs.createWriteStream(pathOut));
+  //   })
+};
+
+
+// greyscale = path.join(__dirname, "test", "in2.png");
+// console.log(greyscale)
+// grayScale(greyscale, "out2.png");
+
 
 module.exports = {
   unzip,
   readDir,
-  grayScale,
+  // grayScale,
 };
