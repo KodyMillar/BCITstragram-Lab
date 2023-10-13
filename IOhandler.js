@@ -54,18 +54,18 @@ const unzip = (pathIn, pathOut) => {
  * @return {promise}
  */
 const readDir = (dir) => {
-  // return new Promise((resolve, reject) => {
-  //   fs.readdir(dir, (err, files) => {
-  //     if (err) {
-  //       reject(err);
-  //     }
-  //     else {
-  //       resolve(files.filter(file => {
-  //         return path.extname(file) === ".png"
-  //       }))
-  //     }
-  //   })
-  // })
+  return new Promise((resolve, reject) => {
+    fs.readdir(dir, (err, files) => {
+      if (err) {
+        reject(err);
+      }
+      else {
+        resolve(files.filter(file => {
+          return path.extname(file) === ".png"
+        }))
+      }
+    })
+  })
 };
 
 /**
