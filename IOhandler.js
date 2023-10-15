@@ -13,6 +13,7 @@
 
 const unzipper = require("unzipper"),
   fs = require("fs"),
+  { pipeline } = require("node:stream"),
   PNG = require("pngjs").PNG,
   path = require("path");
   AdmZip = require("adm-zip")
@@ -78,31 +79,30 @@ const readDir = (dir) => {
  * @return {promise}
  */
 const grayScale = (pathIn, pathOut) => {
-  fs.createReadStream(pathIn)
-    .pipe(
-      new PNG({
-        filterType: 4
-      })
-    )
-    .on("parsed", function () {
-      for (var y = 0; y < this.height; y++) {
-        for (var x = 0; x < this.width; x++) {
-          var idx = (this.width * y + x) << 2;
-
-          var grey = (this.data[idx] + this.data[idx + 1] + this.data[idx + 2]) / 3;
-          this.data[idx] = grey;
-          this.data[idx + 1] = grey;
-          this.data[idx + 2] = grey;
+  return new Promise((resolve, reject) => {
+    fs.createReadStream(pathIn)
+      .pipe(
+        new PNG({
+          filterType: 4
+        })
+      )
+      .on("parsed", function () {
+        for (var y = 0; y < this.height; y++) {
+          for (var x = 0; x < this.width; x++) {
+            var idx = (this.width * y + x) << 2;
+  
+            var grey = (this.data[idx] + this.data[idx + 1] + this.data[idx + 2]) / 3;
+            this.data[idx] = grey;
+            this.data[idx + 1] = grey;
+            this.data[idx + 2] = grey;
+          }
         }
-      }
-      this.pack().pipe(fs.createWriteStream(pathOut));
-    })
+        this.pack().pipe(fs.createWriteStream(pathOut));
+        resolve("Conversion to grayscale successful")
+      })
+      
+  })
 };
-
-
-// greyscale = path.join(__dirname, "test", "in2.png");
-// console.log(greyscale)
-// grayScale(greyscale, "out2.png");
 
 
 module.exports = {

@@ -25,7 +25,7 @@ const path = require("path");
  *      - gives dictionary that has data
  *      - pixels that you can directly modify
  * step 2: inside pngjs, take the byte and average it into greyscale
- * step 3: pipe to a writable stream to a folder called grescaled
+ * step 3: pipe to a writable stream to a folder called greyscaled
  *      - the image inside the folder should be black and white
  * 
  */
@@ -36,6 +36,11 @@ const pathUnzipped = path.join(__dirname, "unzipped");
 const pathProcessed = path.join(__dirname, "grayscaled");
 
 IOhandler.unzip(zipFilePath, pathUnzipped)
-
-// IOhandler.readDir(pathUnzipped)
-
+    .then(() => IOhandler.readDir(pathUnzipped))
+    .then((files) => files.forEach((file) => {
+        IOhandler.grayScale(path.join(pathUnzipped, file), path.join(pathProcessed, file.replace("in", "greyscale")))
+        .then(msg => console.log(msg))
+        .catch(err => console.log(err)) 
+      })
+    )
+    .catch(err => console.log(err));
