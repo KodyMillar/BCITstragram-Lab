@@ -15,6 +15,7 @@ const unzipper = require("unzipper"),
   fs = require("fs"),
   PNG = require("pngjs").PNG,
   path = require("path");
+  AdmZip = require("adm-zip")
 
 /**
  * Description: decompress file from given pathIn, write to given pathOut
@@ -24,28 +25,28 @@ const unzipper = require("unzipper"),
  * @return {promise}
  */
 const unzip = (pathIn, pathOut) => {
-  // return new Transform ({ ObjectMode: true, Transform: (chunk, enc, push) => {
-  //   unzipper.Parse(pathIn);
-  //   fileName = chunk.path;
-  //   if (filaName.includes(".png")) {
-  //     chunk.pipe(fs.createWriteStream(pathOut))
-  //       .on("end", push)
-  //   }
-  // }})
+  // fs.createReadStream(pathIn)
+  //   .pipe(unzipper.Extract( {path: pathOut}))
+  //   .on("entry", entry => entry.autoDrain())
+  //   .promise()
+  //   .then(() => console.log("Extraction operation complete"))
+  //   .catch((err) => console.log(err));
 
-  // unzipper.ParseOne(pathIn)
-  //   .pipe(fs.createWriteStream(pathOut));
+  return new Promise((resolve, reject) => {
+    const zip = new AdmZip(pathIn);
+    
+    try {
+      zip.extractAllTo(pathOut, true);
+    }
+    catch (err){
+      reject(err);
+    }
 
-  fs.createReadStream(pathIn)
-    .pipe(unzipper.Extract( {path: pathOut}))
-    .on("entry", entry => entry.autoDrain())
-    .promise()
+    resolve("Extraction operation complete")
+  })
     .then(() => console.log("Extraction operation complete"))
     .catch((err) => console.log(err));
 };
-// const unzipped = path.join(__dirname, "unzipped")
-// const zipFilePath = path.join(__dirname, "myfile.zip");
-// unzip(zipFilePath, unzipped)
 
 /**
  * Description: read all the png files from given directory and return Promise containing array of each png file path
@@ -107,5 +108,5 @@ const grayScale = (pathIn, pathOut) => {
 module.exports = {
   unzip,
   readDir,
-  // grayScale,
+  grayScale,
 };
