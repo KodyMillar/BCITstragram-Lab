@@ -3,17 +3,15 @@
  * File Name: IOhandler.js
  * Description: Collection of functions for files input/output related operations
  *
- * Created Date:
- * Author:
+ * Created Date: October 17, 2023
+ * Author: Kody Millar
  *
- * 
- * take the lab to the next level - change to filters besides greyscale
  * 
  */
 
 const unzipper = require("unzipper"),
   fs = require("fs"),
-  { pipeline } = require("node:stream"),
+  { pipeline } = require("node:stream/promises"),
   PNG = require("pngjs").PNG,
   path = require("path");
   AdmZip = require("adm-zip")
@@ -46,7 +44,8 @@ const unzip = (pathIn, pathOut) => {
     resolve("Extraction operation complete")
   })
     .then(() => console.log("Extraction operation complete"))
-    .catch((err) => console.log(err));
+    .catch((err) => console.log("Caught Exception: ", err));
+
 };
 
 /**
@@ -81,11 +80,13 @@ const readDir = (dir) => {
 const grayScale = (pathIn, pathOut) => {
   return new Promise((resolve, reject) => {
     fs.createReadStream(pathIn)
+      .on("error", err => reject(err))
       .pipe(
         new PNG({
           filterType: 4
         })
       )
+      .on("error", err => reject(err))
       .on("parsed", function () {
         for (var y = 0; y < this.height; y++) {
           for (var x = 0; x < this.width; x++) {
@@ -98,8 +99,9 @@ const grayScale = (pathIn, pathOut) => {
           }
         }
         this.pack().pipe(fs.createWriteStream(pathOut));
-        resolve("Conversion to grayscale successful")
       })
+      .on("error", err => reject(err))
+      .on("end", () => resolve("conversion to grayscale successful"))
       
   })
 };
